@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+  <title>PRISMA – Tower Defense</title>
+  <meta name="description" content="PRISMA – ein Neon-Tower-Defense mit Element-Reaktionen, Resonanz und Labyrinth-Bau. Für den Browser auf dem Handy.">
+  <meta name="theme-color" content="#0a0b22">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="PRISMA">
+  <link rel="apple-touch-icon" href="icons/icon-180.png">
+  <link rel="icon" type="image/png" href="icons/icon-192.png">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;800;900&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div id="app">
+    <header id="hud">
+      <div class="stat lives" title="Kern-Integrität">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2 21 7v10l-9 5-9-5V7z"/></svg>
+        <span id="lives">20</span>
+      </div>
+      <div class="stat gold" title="Energie">
+        <i class="gem big"></i>
+        <span id="gold">0</span>
+      </div>
+      <div class="stat wave"><small>WELLE</small><span id="wave">0</span></div>
+      <div class="hud-btns">
+        <button id="btnSpeed" class="hbtn" aria-label="Geschwindigkeit">1×</button>
+        <button id="btnPause" class="hbtn" aria-label="Pause">
+          <svg viewBox="0 0 24 24"><rect x="6" y="5" width="4" height="14" rx="1"/><rect x="14" y="5" width="4" height="14" rx="1"/></svg>
+        </button>
+      </div>
+    </header>
+
+    <main id="stage">
+      <canvas id="cv"></canvas>
+      <div id="hint"></div>
+      <div id="toast"></div>
+      <div id="combo"></div>
+    </main>
+
+    <footer id="bar">
+      <div id="actions">
+        <button id="btnRift" class="ability" aria-label="Zeitriss">
+          <span class="ring"></span>
+          <b>⧗ Zeitriss</b><small>bereit</small>
+        </button>
+        <button id="btnWave" class="wavebtn go"><b>▶ Welle 1 starten</b></button>
+      </div>
+      <div id="tray">
+        <div id="shop"></div>
+        <div id="panel" class="hidden"></div>
+      </div>
+    </footer>
+  </div>
+
+  <!-- Hauptmenü -->
+  <section id="menu" class="overlay show">
+    <div class="prisms" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i></div>
+    <div class="menu-inner">
+      <div class="logo">
+        <svg viewBox="0 0 100 90" class="logo-prism" aria-hidden="true">
+          <defs>
+            <linearGradient id="lg" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0" stop-color="#3df5ff"/><stop offset=".5" stop-color="#d14bff"/><stop offset="1" stop-color="#ff7a2f"/>
+            </linearGradient>
+          </defs>
+          <path d="M50 4 96 84H4z" fill="none" stroke="url(#lg)" stroke-width="5" stroke-linejoin="round"/>
+          <path d="M50 30 72 70H28z" fill="url(#lg)" opacity=".35"/>
+        </svg>
+        <h1>PRISMA</h1>
+        <p class="tag">Resonanz · Tower · Defense</p>
+      </div>
+      <button id="btnPlay" class="big-btn">Spielen</button>
+      <button id="btnHelpMenu" class="ghost-btn">So funktioniert's</button>
+      <p id="bestLine" class="best"></p>
+      <p class="foot">Tipp: In Safari „Teilen → Zum Home-Bildschirm“ für Vollbild.</p>
+    </div>
+  </section>
+
+  <!-- Anleitung -->
+  <section id="help" class="overlay">
+    <div class="sheet">
+      <h2>So funktioniert PRISMA</h2>
+      <div class="help-scroll">
+        <div class="hrow"><span class="hi" style="--c:#7df3ff">◆</span><div><b>Schütze den Kern</b>Gegner strömen aus dem Portal oben zum Kristall-Kern unten. Ab Welle 12 öffnet sich ein zweites Portal links.</div></div>
+        <div class="hrow"><span class="hi" style="--c:#5dff8a">⌗</span><div><b>Baue ein Labyrinth</b>Es gibt keinen festen Weg! Gegner nehmen immer die kürzeste Route – deine Türme sind die Wände. Die leuchtende Linie zeigt die aktuelle Route, die Vorschau zeigt die neue. Komplett zubauen geht nicht. <i>Gleiter</i> fliegen einfach drüber.</div></div>
+        <div class="hrow"><span class="hi" style="--c:#ffffff">✦</span><div><b>Resonanz</b>Stehen verschiedene Turmtypen direkt nebeneinander (auch diagonal), verbinden sie sich: <b>+15% Schaden</b> pro unterschiedlichem Nachbar-Typ.</div></div>
+        <div class="hrow"><span class="hi" style="--c:#ffb36b">⚗</span><div><b>Element-Reaktionen</b>
+          <span class="rx" style="--c:#ffb36b">Frost + Glut = <b>Thermoschock</b> – Burst-Schaden, Gegner wird brüchig</span>
+          <span class="rx" style="--c:#9ff7ff">Frost + Volt = <b>Supraleiter</b> – Gegner gefriert komplett</span>
+          <span class="rx" style="--c:#ff8af3">Glut + Volt = <b>Plasma</b> – Explosion im Umkreis</span>
+          Kombiniere Türme so, dass sich ihre Wirkungsbereiche überlappen!</div></div>
+        <div class="hrow"><span class="hi" style="--c:#ffe23d">⟿</span><div><b>Energie ernten</b>Besiegte Gegner lassen Energie-Splitter fallen. <b>Wische darüber</b>, um sie einzusammeln – schnelle Serien geben einen Kombo-Bonus bis ×2,5. Liegengelassene Splitter bringen nur 50%.</div></div>
+        <div class="hrow"><span class="hi" style="--c:#ffffff">⚡</span><div><b>Überladen</b>Tippe einen Turm doppelt (oder im Menü): 5 s lang 2,5× Feuerrate – danach überhitzt er kurz.</div></div>
+        <div class="hrow"><span class="hi" style="--c:#b07bff">⧗</span><div><b>Zeitriss</b>Verlangsamt alle Gegner für 6 s. Lädt in 45 s wieder auf.</div></div>
+        <div class="hrow"><span class="hi" style="--c:#d14bff">●</span><div><b>Vortex</b>Sein Schwerkraftbrunnen saugt Gegner zusammen und implodiert. Je mehr gefangen, desto stärker – perfekt vor Glut und Frost.</div></div>
+        <div class="hrow"><span class="hi" style="--c:#ff3d7f">▲</span><div><b>Gegner</b>Panzer haben Rüstung (die Lanze ignoriert sie), Phantome werden zeitweise unverwundbar, Splitter zerfallen in einen Schwarm, Heiler regenerieren ihre Nachbarn. Alle 10 Wellen kommt ein Koloss.</div></div>
+      </div>
+      <button id="btnHelpClose" class="big-btn">Verstanden</button>
+    </div>
+  </section>
+
+  <!-- Pause -->
+  <section id="pause" class="overlay">
+    <div class="sheet small">
+      <h2>Pause</h2>
+      <button id="btnResume" class="big-btn">Weiter</button>
+      <button id="btnMute" class="ghost-btn">Ton: an</button>
+      <button id="btnHelpPause" class="ghost-btn">Anleitung</button>
+      <button id="btnRestart" class="ghost-btn">Neu starten</button>
+      <button id="btnMenu" class="ghost-btn">Hauptmenü</button>
+    </div>
+  </section>
+
+  <!-- Spielende -->
+  <section id="over" class="overlay">
+    <div class="sheet small">
+      <h2 id="overTitle">Kern zerstört</h2>
+      <p id="overSub" class="sub"></p>
+      <div id="overStats" class="stats"></div>
+      <p id="overBest" class="best"></p>
+      <button id="btnContinue" class="big-btn">Endlos weiterspielen</button>
+      <button id="btnAgain" class="big-btn">Nochmal</button>
+    </div>
+  </section>
+
+  <script type="module" src="js/main.js"></script>
+</body>
+</html>
